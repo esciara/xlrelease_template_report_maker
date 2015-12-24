@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
-from xlrelease_template_report_maker import XLReleaseJsonFetcher, ObjectModelBuilder, ReportBuilder
+from xlrelease_template_report_maker import XLRJsonFetcher, XLRObjectGraphBuilder, XLRReportBuilder
 
 if __name__ == '__main__':
     base_url = 'http://127.0.0.1:5516'
@@ -8,14 +8,14 @@ if __name__ == '__main__':
     username = 'admin'
     password = 'releqsepourlesmaous'
 
-    fetcher = XLReleaseJsonFetcher(base_url, template_id, username, password)
+    fetcher = XLRJsonFetcher(base_url, template_id, username, password)
     json_data = fetcher.fetch()
 
-    builder = ObjectModelBuilder(json_data)
+    builder = XLRObjectGraphBuilder(json_data)
     template = builder.build()
 
-    report_builder = ReportBuilder(template)
-    report_builder.build()
+    report_builder = XLRReportBuilder(template)
+    report_builder.build_report()
     report_builder.save_to_file(os.path.join('output', 'xlrelease_template_report.xls'))
 
 
