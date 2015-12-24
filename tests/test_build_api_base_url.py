@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from unittest import TestCase
-from xlrelease_export_pipeline import *
+from xlrelease_template_report_maker import *
 
 
 class TestBuildUrls(TestCase):

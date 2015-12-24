@@ -1,6 +1,9 @@
 # OS-specific
 .DS_Store
 
+# Output files
+output/
+
 # IDE junk
 .idea/*
 *.iml
