@@ -43,13 +43,18 @@ class XLRObjectGraphBuilder(object):
     def build(self):
         self.template = self.build_template_obj()
         self.template.phases.extend(self.build_phases_objs())
+        for i in range(len(self.template.phases)):
+            self.template.phases[i].tasks.extend(self.build_tasks_objs(i))
         return self.template
 
     def build_template_obj(self):
         return XLRTemplate(self.json_data)
 
     def build_phases_objs(self):
-        return deque([XLRPhase(phase) for phase in self.json_data['phases']])
+        return deque([XLRPhase(json_subset) for json_subset in self.json_data['phases']])
+
+    def build_tasks_objs(self, location):
+        return deque([XLRTask(json_subset) for json_subset in self.json_data['phases'][location]['tasks']])
 
 
 class WrongJsonNodeTypeError(Exception):
@@ -61,14 +66,17 @@ class XLRModelBase(object):
 
     @abstractmethod
     def __init__(self, json_data):
-        if not self.verify_json_node_type(json_data):
-            raise WrongJsonNodeTypeError()
+        is_same_type, msg = self.verify_json_node_type(json_data)
+        if not is_same_type:
+            raise WrongJsonNodeTypeError(msg)
         # verify type
         self.title = json_data['title']
 
     @classmethod
     def verify_json_node_type(cls, json_data):
-        return json_data['type'] == cls.JSON_TYPE_NODE
+        is_same_type = json_data['type'] == cls.JSON_TYPE_NODE
+        msg = '' if is_same_type else "Expected %r but got %r" % (cls.JSON_TYPE_NODE, json_data['type'])
+        return is_same_type, msg
 
 
 class XLRTemplate(XLRModelBase):
@@ -84,13 +92,21 @@ class XLRPhase(XLRModelBase):
 
     def __init__(self, json_data):
         super(XLRPhase, self).__init__(json_data)
+        self.tasks = []
 
 
 class XLRTask(XLRModelBase):
-    JSON_TYPE_NODE = 'xlrelease.Task'
+    JSON_TYPE_NODE = ['xlrelease.GateTask', 'xlrelease.Task', 'xlrelease.NotificationTask', 'xlrelease.DeployitTask',
+                      'xlrelease.ScriptTask', 'xlrelease.ParallelGroup', 'xlrelease.CustomScriptTask']
 
     def __init__(self, json_data):
         super(XLRTask, self).__init__(json_data)
+
+    @classmethod
+    def verify_json_node_type(cls, json_data):
+        is_good_type = json_data['type'] in cls.JSON_TYPE_NODE
+        msg = '' if is_good_type else "Expected one of %r but got %r" % (cls.JSON_TYPE_NODE, json_data['type'])
+        return is_good_type, msg
 
 
 class XLRReportBuilder(object):

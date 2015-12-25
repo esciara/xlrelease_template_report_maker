@@ -58,10 +58,21 @@ class TestXLRObjectGraphBuilder(TestCase):
         phases = self.builder.build_phases_objs()
         self.assertEqual(3, len(phases))
 
-    def test_should_extract_template_with_phases(self):
+    def test_should_extract_tasks(self):
+        tasks = self.builder.build_tasks_objs(0)
+        self.assertEqual(7, len(tasks))
+
+    def test_should_build_model(self):
         template = self.builder.build()
         self.assertIsNotNone(template)
-        self.assertEqual(3, len(template.phases))
+        phases = template.phases
+        self.assertEqual(3, len(phases))
+        tasks = phases[0].tasks
+        self.assertEqual(7, len(tasks))
+        tasks = phases[1].tasks
+        self.assertEqual(1, len(tasks))
+        tasks = phases[2].tasks
+        self.assertEqual(4, len(tasks))
 
 
 #######################
@@ -81,7 +92,8 @@ class TestXLRModelBase(TestCase):
         self.json_data_wrong_type = json.loads("{\"title\": \"any title\", \"type\": \"any.other.test.type\"}")
 
     def test_should_verify_json_node_type(self):
-        self.assertFalse(TestXLRModelBase.XLRTestModel.verify_json_node_type(self.json_data_wrong_type))
+        is_correct_type, msg = TestXLRModelBase.XLRTestModel.verify_json_node_type(self.json_data_wrong_type)
+        self.assertFalse(is_correct_type)
 
     def test_should_Exception_when_wrong_json_node_type(self):
         with self.assertRaises(WrongJsonNodeTypeError):
@@ -120,8 +132,10 @@ class TestXLRPhase(TestCase):
 
 class TestXLRTask(TestCase):
     def setUp(self):
-        self.json_node_type = "xlrelease.Task"
-        self.json_data = json.loads("{\"title\": \"any title\", \"type\": \"%s\"}" % self.json_node_type)
+        self.json_node_type = ['xlrelease.GateTask', 'xlrelease.Task', 'xlrelease.NotificationTask',
+                               'xlrelease.DeployitTask', 'xlrelease.ScriptTask', 'xlrelease.ParallelGroup',
+                               'xlrelease.CustomScriptTask']
+        self.json_data = json.loads("{\"title\": \"any title\", \"type\": \"xlrelease.Task\"}")
 
     def test_should_have_correct_json_node_type(self):
         self.assertEqual(self.json_node_type, XLRTask.JSON_TYPE_NODE)
