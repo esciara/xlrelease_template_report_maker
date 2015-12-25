@@ -86,6 +86,13 @@ class XLRPhase(XLRModelBase):
         super(XLRPhase, self).__init__(json_data)
 
 
+class XLRTask(XLRModelBase):
+    JSON_TYPE_NODE = 'xlrelease.Task'
+
+    def __init__(self, json_data):
+        super(XLRTask, self).__init__(json_data)
+
+
 class XLRReportBuilder(object):
     def __init__(self, template):
         self.template = template

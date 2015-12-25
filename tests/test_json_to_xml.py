@@ -88,8 +88,8 @@ class TestXLRModelBase(TestCase):
             TestXLRModelBase.XLRTestModel(self.json_data_wrong_type)
 
     def test_should_extract_attributes(self):
-        template = TestXLRModelBase.XLRTestModel(self.json_data)
-        self.assertEqual(self.json_data['title'], template.title)
+        xlr_object = TestXLRModelBase.XLRTestModel(self.json_data)
+        self.assertEqual(self.json_data['title'], xlr_object.title)
 
 
 class TestXLRTemplate(TestCase):
@@ -101,8 +101,8 @@ class TestXLRTemplate(TestCase):
         self.assertEqual(self.json_node_type, XLRTemplate.JSON_TYPE_NODE)
 
     def test_should_extract_attributes(self):
-        template = XLRTemplate(self.json_data)
-        self.assertEqual(self.json_data['title'], template.title)
+        xlr_object = XLRTemplate(self.json_data)
+        self.assertEqual(self.json_data['title'], xlr_object.title)
 
 
 class TestXLRPhase(TestCase):
@@ -114,8 +114,21 @@ class TestXLRPhase(TestCase):
         self.assertEqual(self.json_node_type, XLRPhase.JSON_TYPE_NODE)
 
     def test_should_extract_attributes(self):
-        template = XLRPhase(self.json_data)
-        self.assertEqual(self.json_data['title'], template.title)
+        xlr_object = XLRPhase(self.json_data)
+        self.assertEqual(self.json_data['title'], xlr_object.title)
+
+
+class TestXLRTask(TestCase):
+    def setUp(self):
+        self.json_node_type = "xlrelease.Task"
+        self.json_data = json.loads("{\"title\": \"any title\", \"type\": \"%s\"}" % self.json_node_type)
+
+    def test_should_have_correct_json_node_type(self):
+        self.assertEqual(self.json_node_type, XLRTask.JSON_TYPE_NODE)
+
+    def test_should_extract_attributes(self):
+        xlr_object = XLRTask(self.json_data)
+        self.assertEqual(self.json_data['title'], xlr_object.title)
 
 
 #############################
