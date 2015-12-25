@@ -105,6 +105,19 @@ class TestXLRTemplate(TestCase):
         self.assertEqual(self.json_data['title'], template.title)
 
 
+class TestXLRPhase(TestCase):
+    def setUp(self):
+        self.json_node_type = "xlrelease.Phase"
+        self.json_data = json.loads("{\"title\": \"any title\", \"type\": \"%s\"}" % self.json_node_type)
+
+    def test_should_have_correct_json_node_type(self):
+        self.assertEqual(self.json_node_type, XLRPhase.JSON_TYPE_NODE)
+
+    def test_should_extract_attributes(self):
+        template = XLRPhase(self.json_data)
+        self.assertEqual(self.json_data['title'], template.title)
+
+
 #############################
 # Testing XLR Report Builder
 #############################
