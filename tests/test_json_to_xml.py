@@ -152,9 +152,18 @@ class TestXLRTask(TestCase):
 class TestXLRReportBuilder(TestCase):
     def setUp(self):
         self.template = Mock(title='This is my title', phases=deque([]))
-        self.template.phases.extend(deque([Mock(title='This is my title 1'),
-                                           Mock(title='This is my title 2'),
-                                           Mock(title='This is my title 3')]))
+        self.template.phases.extend(deque([Mock(title='This is my title 1', tasks=[]),
+                                           Mock(title='This is my title 2', tasks=[]),
+                                           Mock(title='This is my title 3', tasks=[])]))
+        self.template.phases[0].tasks.extend(deque([Mock(title='This is my title 1.1'),
+                                                    Mock(title='This is my title 1.2')]))
+        self.template.phases[1].tasks.extend(deque([Mock(title='This is my title 2.1'),
+                                                    Mock(title='This is my title 2.2'),
+                                                    Mock(title='This is my title 2.3')]))
+        self.template.phases[2].tasks.extend(deque([Mock(title='This is my title 3.1'),
+                                                    Mock(title='This is my title 3.2'),
+                                                    Mock(title='This is my title 3.3'),
+                                                    Mock(title='This is my title 3.4')]))
         self.builder = XLRReportBuilder(self.template)
         self.output_xlsx_filename = os.path.join('output', 'sample.xlsx')
         if os.path.exists(self.output_xlsx_filename):
@@ -171,16 +180,43 @@ class TestXLRReportBuilder(TestCase):
     def test_should_populate_report_with_phases(self):
         self.builder.populate_report_with_phases()
         self.assertEqual(self.template.phases.popleft().title, self.builder.worksheet['A2'].value)
-        self.assertEqual(self.template.phases.popleft().title, self.builder.worksheet['A3'].value)
         self.assertEqual(self.template.phases.popleft().title, self.builder.worksheet['A4'].value)
+        self.assertEqual(self.template.phases.popleft().title, self.builder.worksheet['A7'].value)
+
+    def test_should_populate_report_with_tasks(self):
+        phase_position = 0
+        offset = 2
+        self.builder.populate_report_with_tasks_for_phase(phase_position=phase_position, offset=offset)
+        self.assertEqual(self.template.phases[phase_position].tasks[0].title, self.builder.worksheet['B2'].value)
+        self.assertEqual(self.template.phases[phase_position].tasks[1].title, self.builder.worksheet['B3'].value)
+        phase_position = 1
+        offset = 3
+        self.builder.populate_report_with_tasks_for_phase(phase_position=phase_position, offset=offset)
+        self.assertEqual(self.template.phases[phase_position].tasks[0].title, self.builder.worksheet['B4'].value)
+        self.assertEqual(self.template.phases[phase_position].tasks[1].title, self.builder.worksheet['B5'].value)
+        self.assertEqual(self.template.phases[phase_position].tasks[2].title, self.builder.worksheet['B6'].value)
 
     def test_should_build_report(self):
         self.builder.build_report()
         self.assertIsNotNone(self.builder.worksheet['A1'].value)
+
         self.assertIsNotNone(self.builder.worksheet['A2'].value)
-        self.assertIsNotNone(self.builder.worksheet['A3'].value)
+        self.assertIsNotNone(self.builder.worksheet['B2'].value)
+        self.assertIsNotNone(self.builder.worksheet['B3'].value)
+
         self.assertIsNotNone(self.builder.worksheet['A4'].value)
-        self.assertIsNone(self.builder.worksheet['A5'].value)
+        self.assertIsNotNone(self.builder.worksheet['B4'].value)
+        self.assertIsNotNone(self.builder.worksheet['B5'].value)
+        self.assertIsNotNone(self.builder.worksheet['B6'].value)
+
+        self.assertIsNotNone(self.builder.worksheet['A7'].value)
+        self.assertIsNotNone(self.builder.worksheet['B7'].value)
+        self.assertIsNotNone(self.builder.worksheet['B8'].value)
+        self.assertIsNotNone(self.builder.worksheet['B9'].value)
+        self.assertIsNotNone(self.builder.worksheet['B10'].value)
+
+        self.assertIsNone(self.builder.worksheet['A11'].value)
+        self.assertIsNone(self.builder.worksheet['B13'].value)
 
     def test_should_save_to_file(self):
         self.builder.save_to_file(self.output_xlsx_filename)

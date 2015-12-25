@@ -120,12 +120,22 @@ class XLRReportBuilder(object):
         self.populate_report_with_phases()
 
     def populate_report_with_template(self):
-        self.worksheet['A1'] = self.template.title
+        # self.worksheet['A1'] = self.template.title
+        self.worksheet.cell(row=1, column=1).value = self.template.title
 
     def populate_report_with_phases(self):
         # TODO put le phases in a method "build_phase_info" or populate_phase_info
+        offset = 2
         for i in range(len(self.template.phases)):
-            self.worksheet["A{0}".format(2 + i)] = self.template.phases[i].title
+            self.worksheet.cell(row=i + offset, column=1).value = self.template.phases[i].title
+            num_of_tasks = len(self.template.phases[i].tasks)
+            self.populate_report_with_tasks_for_phase(i, offset)
+            offset += num_of_tasks - 1
+
+    def populate_report_with_tasks_for_phase(self, phase_position, offset):
+        for j in range(len(self.template.phases[phase_position].tasks)):
+            self.worksheet.cell(row=phase_position + offset + j, column=2).value = \
+                self.template.phases[phase_position].tasks[j].title
 
     def save_to_file(self, filename):
         self.workbook.save(filename)
