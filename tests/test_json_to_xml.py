@@ -16,6 +16,10 @@ TEMPLATE_ID_PREFIX = 'Applications/'
 FULLY_FORMED_URL = '%s/api/v1/templates/%s%s' % (BASE_URL, TEMPLATE_ID_PREFIX, TEMPLATE_ID)
 
 
+#############################
+# Testing XLR Json Fetcher
+#############################
+
 class TestXLRJsonFetcher(TestCase):
     def setUp(self):
         # TODO put username and password in a config file (or mock the whole thing)
@@ -35,6 +39,10 @@ class TestXLRJsonFetcher(TestCase):
         #     resp = self.fetcher.send_http_request_to_xlrelease(FULLY_FORMED_URL)
         #     self.assertEqual(200, resp.status_code)
 
+
+##################################
+# Testing XLR Object Graph Builder
+##################################
 
 class TestXLRObjectGraphBuilder(TestCase):
     def setUp(self):
@@ -56,22 +64,50 @@ class TestXLRObjectGraphBuilder(TestCase):
         self.assertEqual(3, len(template.phases))
 
 
-class TestXLRTemplate(TestCase):
+#######################
+# Testing XLR Models
+#######################
+
+
+class TestXLRModelBase(TestCase):
+    class XLRTestModel(XLRModelBase):
+        JSON_TYPE_NODE = 'test.type'
+
+        def __init__(self, json_data):
+            super(TestXLRModelBase.XLRTestModel, self).__init__(json_data)
+
     def setUp(self):
-        self.json_data = json.loads("{\"title\": \"any title\", \"type\": \"xlrelease.Release\"}")
-        self.json_data_wrong_type = json.loads("{\"title\": \"any title\", \"type\": \"any.other.type\"}")
+        self.json_data = json.loads("{\"title\": \"any title\", \"type\": \"test.type\"}")
+        self.json_data_wrong_type = json.loads("{\"title\": \"any title\", \"type\": \"any.other.test.type\"}")
 
     def test_should_verify_json_node_type(self):
-        self.assertTrue(XLRTemplate.verify_json_node_type(self.json_data))
-        self.assertFalse(XLRTemplate.verify_json_node_type(self.json_data_wrong_type))
+        self.assertFalse(TestXLRModelBase.XLRTestModel.verify_json_node_type(self.json_data_wrong_type))
 
     def test_should_Exception_when_wrong_json_node_type(self):
         with self.assertRaises(WrongJsonNodeTypeError):
-            XLRTemplate(self.json_data_wrong_type)
+            TestXLRModelBase.XLRTestModel(self.json_data_wrong_type)
+
+    def test_should_extract_attributes(self):
+        template = TestXLRModelBase.XLRTestModel(self.json_data)
+        self.assertEqual(self.json_data['title'], template.title)
+
+
+class TestXLRTemplate(TestCase):
+    def setUp(self):
+        self.json_node_type = "xlrelease.Release"
+        self.json_data = json.loads("{\"title\": \"any title\", \"type\": \"%s\"}" % self.json_node_type)
+
+    def test_should_have_correct_json_node_type(self):
+        self.assertEqual(self.json_node_type, XLRTemplate.JSON_TYPE_NODE)
 
     def test_should_extract_attributes(self):
         template = XLRTemplate(self.json_data)
         self.assertEqual(self.json_data['title'], template.title)
+
+
+#############################
+# Testing XLR Report Builder
+#############################
 
 class TestXLRReportBuilder(TestCase):
     def setUp(self):
