@@ -2,7 +2,7 @@
 import json
 import os
 from collections import deque
-from unittest import TestCase
+from unittest2 import TestCase
 
 from mock import Mock
 
@@ -46,7 +46,17 @@ class TestXLRJsonFetcher(TestCase):
 
 class TestXLRObjectGraphBuilder(TestCase):
     def setUp(self):
-        with open('data/%s.json' % TEMPLATE_ID) as json_file:
+        current_path = os.getcwd()
+        if 'test' not in current_path.split(os.sep)[-1]:
+            extended_path = os.path.join(current_path, 'test')
+            if not os.path.exists(extended_path):
+                extended_path = os.path.join(current_path, 'tests')
+                if not os.path.exists(extended_path):
+                    raise IOError(
+                            "Directory 'test' or 'tests' not found in %r : "
+                            "cannot load files in 'data' directory needed for the tests" % current_path)
+            current_path = extended_path
+        with open(os.path.join(current_path, 'data', '%s.json' % TEMPLATE_ID)) as json_file:
             self.json_data = json.load(json_file)
             self.builder = XLRObjectGraphBuilder(self.json_data)
 
