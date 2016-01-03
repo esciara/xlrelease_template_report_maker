@@ -21,6 +21,13 @@ setup(
             'Programming Language :: Python :: 2',
             'Topic :: Software Development :: Libraries :: Python Modules',
         ],
-        tests_require=['mock', 'unittest2'],
+        install_requires=[
+            'requests',
+            'openpyxl',
+        ],
+        tests_require=[
+            'mock',
+            'unittest2',
+        ],
         test_suite='unittest2.collector'
 )
