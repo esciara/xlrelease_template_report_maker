@@ -40,23 +40,32 @@ class TestXLRJsonFetcher(TestCase):
         #     self.assertEqual(200, resp.status_code)
 
 
+def check_on_test_directories_and_create_if_needed():
+    current_path = os.getcwd()
+    if 'test' not in current_path.split(os.sep)[-1]:
+        extended_path = os.path.join(current_path, 'test')
+        if not os.path.exists(extended_path):
+            extended_path = os.path.join(current_path, 'tests')
+            if not os.path.exists(extended_path):
+                raise IOError(
+                        "Directory 'test' or 'tests' not found in %r : "
+                        "cannot reach 'data' and create 'output' directories needed for the tests" % current_path)
+        current_path = extended_path
+    data_path = os.path.join(current_path, 'data')
+    output_path = os.path.join(current_path, 'output')
+    if not os.path.exists(output_path):
+        os.makedirs(output_path)
+    return data_path, current_path
+
+
 ##################################
 # Testing XLR Object Graph Builder
 ##################################
 
 class TestXLRObjectGraphBuilder(TestCase):
     def setUp(self):
-        current_path = os.getcwd()
-        if 'test' not in current_path.split(os.sep)[-1]:
-            extended_path = os.path.join(current_path, 'test')
-            if not os.path.exists(extended_path):
-                extended_path = os.path.join(current_path, 'tests')
-                if not os.path.exists(extended_path):
-                    raise IOError(
-                            "Directory 'test' or 'tests' not found in %r : "
-                            "cannot load files in 'data' directory needed for the tests" % current_path)
-            current_path = extended_path
-        with open(os.path.join(current_path, 'data', '%s.json' % TEMPLATE_ID)) as json_file:
+        data_path, output_path = check_on_test_directories_and_create_if_needed()
+        with open(os.path.join(data_path, '%s.json' % TEMPLATE_ID)) as json_file:
             self.json_data = json.load(json_file)
             self.builder = XLRObjectGraphBuilder(self.json_data)
 
@@ -175,7 +184,8 @@ class TestXLRReportBuilder(TestCase):
                                                     Mock(title='This is my title 3.3'),
                                                     Mock(title='This is my title 3.4')]))
         self.builder = XLRReportBuilder(self.template)
-        self.output_xlsx_filename = os.path.join('output', 'sample.xlsx')
+        data_path, output_path = check_on_test_directories_and_create_if_needed()
+        self.output_xlsx_filename = os.path.join(output_path, 'sample.xlsx')
         if os.path.exists(self.output_xlsx_filename):
             os.remove(self.output_xlsx_filename)
 
