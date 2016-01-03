@@ -26,7 +26,7 @@ setup(
             'openpyxl~=2.3',
         ],
         tests_require=[
-            'mock~=1.3',
+            'mock~=1.0',
             'unittest2~=1.1',
         ],
         test_suite='unittest2.collector'
