@@ -22,12 +22,12 @@ setup(
             'Topic :: Software Development :: Libraries :: Python Modules',
         ],
         install_requires=[
-            'requests',
-            'openpyxl',
+            'requests~=2.9',
+            'openpyxl~=2.3',
         ],
         tests_require=[
-            'mock',
-            'unittest2',
+            'mock~=1.3',
+            'unittest2~=1.1',
         ],
         test_suite='unittest2.collector'
 )
